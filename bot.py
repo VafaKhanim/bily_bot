@@ -1,5 +1,7 @@
 import os
 import time
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -13,6 +15,23 @@ if not TOKEN:
     raise ValueError("BOT_TOKEN environment variable is not set!")
 
 
+# Minimal HTTP server
+class Handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"Bot is running!")
+
+    def log_message(self, format, *args):
+        pass  # server loglarını sustur
+
+
+def run_server():
+    port = int(os.environ.get("PORT", 10000))
+    server = HTTPServer(("0.0.0.0", port), Handler)
+    server.serve_forever()
+
+
 def check_billie_jean():
     options = Options()
     options.add_argument("--headless")
@@ -22,7 +41,6 @@ def check_billie_jean():
     options.add_argument("--window-size=1920,1080")
 
     driver = webdriver.Chrome(options=options)
-
     try:
         driver.get("https://www.youtube.com")
         time.sleep(3)
@@ -30,9 +48,7 @@ def check_billie_jean():
         search_box.send_keys("Billie Jean")
         search_box.send_keys(Keys.RETURN)
         time.sleep(3)
-        page_source = driver.page_source
-
-        if "Michael Jackson - Billie Jean (Official Video)" in page_source:
+        if "Michael Jackson - Billie Jean (Official Video)" in driver.page_source:
             return True
         return False
     finally:
@@ -52,6 +68,8 @@ async def billie_jean(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 if __name__ == "__main__":
+    threading.Thread(target=run_server, daemon=True).start()
+
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("billie_jean", billie_jean))
     app.run_polling(drop_pending_updates=True)
