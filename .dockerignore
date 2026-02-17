@@ -1,0 +1,47 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+.env/
+.venv/
+
+# Environment variables
+.env
+.env.*
+
+# IDE (PyCharm)
+.idea/
+*.iml
+
+# Git
+.git/
+.gitignore
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# SQLite database (əgər local üçündürsə)
+*.sqlite3
+*.db
+
+# Docker özü
+Dockerfile
+docker-compose.yml
+
+# Tests (əgər production image üçündürsə)
+tests/
+
+# Node (əgər frontend yoxdursa)
+node_modules/
+
+# Coverage
+.coverage
+htmlcov/
