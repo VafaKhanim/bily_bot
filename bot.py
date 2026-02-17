@@ -54,4 +54,4 @@ async def billie_jean(update: Update, context: ContextTypes.DEFAULT_TYPE):
 if __name__ == "__main__":
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("billie_jean", billie_jean))
-    app.run_polling()
+    app.run_polling(drop_pending_updates=True)
