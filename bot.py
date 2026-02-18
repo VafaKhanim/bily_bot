@@ -6,6 +6,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
+from io import BytesIO
 
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
@@ -15,7 +16,6 @@ if not TOKEN:
     raise ValueError("BOT_TOKEN environment variable is not set!")
 
 
-# Minimal HTTP server
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
@@ -23,7 +23,7 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(b"Bot is running!")
 
     def log_message(self, format, *args):
-        pass  # server loglarını sustur
+        pass
 
 
 def run_server():
@@ -41,6 +41,8 @@ def check_billie_jean():
     options.add_argument("--window-size=1920,1080")
 
     driver = webdriver.Chrome(options=options)
+    screenshot_bytes = None
+
     try:
         driver.get("https://www.youtube.com")
         time.sleep(3)
@@ -48,20 +50,30 @@ def check_billie_jean():
         search_box.send_keys("Billie Jean")
         search_box.send_keys(Keys.RETURN)
         time.sleep(3)
-        if "Michael Jackson - Billie Jean (Official Video)" in driver.page_source:
-            return True
-        return False
+
+        found = "Michael Jackson - Billie Jean (Official Video)" in driver.page_source
+
+        if found:
+            # Skrinşotu bytes olaraq yaddaşda saxla (fayl yaratmadan)
+            screenshot_bytes = driver.get_screenshot_as_png()
+
+        return found, screenshot_bytes
     finally:
         driver.quit()
 
 
 async def billie_jean(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
-        result = check_billie_jean()
+        result, screenshot = check_billie_jean()
         if result:
-            await update.message.reply_text("✅ Success")
+            await update.message.reply_text("✅ Tapıldı!")
+            # Skrinşotu BytesIO-ya çevirib göndər
+            await update.message.reply_photo(
+                photo=BytesIO(screenshot),
+                caption="📸 Nəticə skrinşotu"
+            )
         else:
-            await update.message.reply_text("❌ Not found")
+            await update.message.reply_text("❌ Tapılmadı")
     except Exception as e:
         await update.message.reply_text(f"⚠️ Xəta: {str(e)}")
         print(f"Error: {e}")
