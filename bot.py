@@ -54,7 +54,7 @@ def check_billie_jean():
         found = "Michael Jackson - Billie Jean (Official Video)" in driver.page_source
 
         if found:
-            # Skrinşotu bytes olaraq yaddaşda saxla (fayl yaratmadan)
+            # Skrinşotu bytes olaraq yaddaşda saxlamaq üçün lazım imiş (fayl yaratmadan)
             screenshot_bytes = driver.get_screenshot_as_png()
 
         return found, screenshot_bytes
@@ -66,16 +66,15 @@ async def billie_jean(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         result, screenshot = check_billie_jean()
         if result:
-            await update.message.reply_text("✅ Tapıldı!")
-            # Skrinşotu BytesIO-ya çevirib göndər
+            await update.message.reply_text("✅ Success")
             await update.message.reply_photo(
                 photo=BytesIO(screenshot),
-                caption="📸 Nəticə skrinşotu"
+                caption="Result ss"
             )
         else:
-            await update.message.reply_text("❌ Tapılmadı")
+            await update.message.reply_text("❌ Not here")
     except Exception as e:
-        await update.message.reply_text(f"⚠️ Xəta: {str(e)}")
+        await update.message.reply_text(f"⚠Error: {str(e)}")
         print(f"Error: {e}")
 
 
